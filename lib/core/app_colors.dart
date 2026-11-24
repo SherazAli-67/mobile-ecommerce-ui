@@ -11,5 +11,9 @@ class AppColors {
   static const neutral100 = Color(0xFF101010);
   static const secondaryMain = Color(0xFFFFD33C);
   static const badgeRed = Color(0xFFF13658);
+  static const reviewBlue = Color(0xFF347EFB);
+  static const grey3 = Color(0xFFF6F6F6);
+  static const grey11 = Color(0xFF433F40);
+  static const paymentCardBg = Color(0xFFF2F2F2);
   static const blackColor = Color(0xFF000000);
 }
