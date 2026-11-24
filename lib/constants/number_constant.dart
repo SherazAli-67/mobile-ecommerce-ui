@@ -36,4 +36,13 @@ class NumberConstant {
   static const checkoutItemGap = 24.0;
   static const cartThumbSize = 70.0;
   static const primaryButtonVerticalPadding = 18.0;
+  static const primaryButtonHorizontalPadding = 16.0;
+  static const primaryButtonRadius = 45.0;
+  static const primaryButtonIconGap = 8.0;
+  static const quantityStepperGap = 12.0;
+  static const quantityActionPadding = 8.0;
+  static const quantityActionPaddingCompact = 4.0;
+  static const bottomNavBadgeSize = 8.0;
+  static const bottomNavDotSize = 4.0;
+  static const bottomNavItemPadding = 8.0;
 }
