@@ -24,4 +24,32 @@ class ProductModel {
     this.isFavorite = false,
     this.useTallImage = false,
   });
+
+  ProductModel copyWith({
+    String? id,
+    String? name,
+    String? category,
+    double? price,
+    double? originalPrice,
+    double? rating,
+    int? reviewCount,
+    String? image,
+    String? description,
+    bool? isFavorite,
+    bool? useTallImage,
+  }) {
+    return ProductModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      price: price ?? this.price,
+      originalPrice: originalPrice ?? this.originalPrice,
+      rating: rating ?? this.rating,
+      reviewCount: reviewCount ?? this.reviewCount,
+      image: image ?? this.image,
+      description: description ?? this.description,
+      isFavorite: isFavorite ?? this.isFavorite,
+      useTallImage: useTallImage ?? this.useTallImage,
+    );
+  }
 }
