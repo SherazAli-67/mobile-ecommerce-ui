@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ecommerce_ui/constants/string_const.dart';
+import 'package:mobile_ecommerce_ui/presentation/screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,12 +13,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mobile Ecommerce',
+      title: StringConst.appTitle,
       theme: ThemeData(
-
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        brightness: .light
       ),
-      home: Scaffold(body: Center(child: Text("Mobile ecommerce"),),)
+      home:  HomeScreen()
     );
   }
 }
