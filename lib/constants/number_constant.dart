@@ -59,4 +59,15 @@ class NumberConstant {
   static const sizeChipPadding = 10.0;
   static const colorSwatchExtent = 26.0;
   static const reviewGap = 8.0;
+  static const cartThumbRadius = 14.0;
+  static const cartItemGap = 15.0;
+  static const cartItemContentGap = 16.0;
+  static const cartItemActionsGap = 20.0;
+  static const checkoutSectionSpacing = 24.0;
+  static const checkoutSummaryGap = 12.0;
+  static const paymentCardPadding = 20.0;
+  static const paymentCardVerticalPadding = 16.0;
+  static const visaWidth = 45.0;
+  static const visaHeight = 30.0;
+  static const checkoutAppBarPadding = 16.0;
 }

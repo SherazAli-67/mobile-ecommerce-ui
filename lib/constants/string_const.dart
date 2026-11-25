@@ -1,6 +1,6 @@
 class StringConst {
   static const appTitle = 'Mobile Ecommerce';
-  static const appFontFamily = 'Sora';
+  static const appFontFamily = 'Outfit';
   static const helloWelcome = 'Hello, Welcome 👋';
   static const userName = 'Albert Stevano';
   static const searchClothesHint = 'Search clothes. . .';
@@ -20,7 +20,10 @@ class StringConst {
   static const addToCart = 'Add to Cart';
   static const checkout = 'Checkout';
   static const shippingInformation = 'Shipping Information';
-  static const maskedCardNumber = '**** **** **** 2143';
+  static const maskedCardPrefix = '**** **** **** ';
+  static const maskedCardLastFour = '2143';
+  static const maskedCardNumber = '$maskedCardPrefix$maskedCardLastFour';
+
   static const subTotal = 'Sub Total';
   static const shippingFee = 'Shipping Fee';
   static const discount = 'Discount';
@@ -31,7 +34,16 @@ class StringConst {
 
   static String totalItems(int count) => 'Total ($count items)';
 
-  static String price(double value) => '\$${value.toStringAsFixed(2)}';
+  static String price(double value) {
+    final parts = value.toStringAsFixed(2).split('.');
+    final digits = parts[0];
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) buffer.write(',');
+      buffer.write(digits[i]);
+    }
+    return '\$$buffer.${parts[1]}';
+  }
 
   static String reviewLabel(double rating, int count) => '$rating ($count $reviewsSuffix)';
 
