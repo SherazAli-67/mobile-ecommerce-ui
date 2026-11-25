@@ -45,4 +45,10 @@ class NumberConstant {
   static const bottomNavBadgeSize = 8.0;
   static const bottomNavDotSize = 4.0;
   static const bottomNavItemPadding = 8.0;
+  static const homeTopPadding = 8.0;
+  static const homeHeaderToSearch = 16.0;
+  static const homeSearchToCategory = 32.0;
+  static const homeCategoryToGrid = 24.0;
+  static const homeBottomContentPadding = 110.0;
+  static const profileAvatarSize = 32.0;
 }
