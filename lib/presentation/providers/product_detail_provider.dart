@@ -15,6 +15,7 @@ class ProductDetailProvider extends ChangeNotifier {
   String _selectedSize;
   Color _selectedColor;
   bool _isFavorite;
+  bool _isDescriptionExpanded = false;
 
   static const colors = [AppColors.grey4, AppColors.grey11, AppColors.grey10];
 
@@ -27,6 +28,8 @@ class ProductDetailProvider extends ChangeNotifier {
   Color get selectedColor => _selectedColor;
 
   bool get isFavorite => _isFavorite;
+
+  bool get isDescriptionExpanded => _isDescriptionExpanded;
 
   List<String> get sizes => AppData.sizes;
 
@@ -58,6 +61,11 @@ class ProductDetailProvider extends ChangeNotifier {
   void toggleFavorite() {
     _isFavorite = !_isFavorite;
     _product = _product.copyWith(isFavorite: _isFavorite);
+    notifyListeners();
+  }
+
+  void toggleDescription() {
+    _isDescriptionExpanded = !_isDescriptionExpanded;
     notifyListeners();
   }
 }

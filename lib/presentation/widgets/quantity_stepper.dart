@@ -10,6 +10,7 @@ class QuantityStepper extends StatelessWidget {
   final VoidCallback? onIncrement;
   final VoidCallback? onDecrement;
   final bool compact;
+  final TextStyle? quantityStyle;
 
   const QuantityStepper({
     super.key,
@@ -17,6 +18,7 @@ class QuantityStepper extends StatelessWidget {
     this.onIncrement,
     this.onDecrement,
     this.compact = false,
+    this.quantityStyle,
   });
 
   @override
@@ -27,7 +29,7 @@ class QuantityStepper extends StatelessWidget {
       spacing: NumberConstant.quantityStepperGap,
       children: [
         _buildAction(icon: AssetRes.icMinus, onTap: onDecrement, padding: actionPadding),
-        Text('$quantity', style: AppTextStyles.quantity,),
+        Text('$quantity', style: quantityStyle ?? AppTextStyles.quantity,),
         _buildAction(icon: AssetRes.icAdd, onTap: onIncrement, padding: actionPadding),
       ],
     );

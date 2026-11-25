@@ -51,4 +51,12 @@ class NumberConstant {
   static const homeCategoryToGrid = 24.0;
   static const homeBottomContentPadding = 110.0;
   static const profileAvatarSize = 32.0;
+  static const detailImageAspect = 327 / 392;
+  static const detailImageActionInset = 16.0;
+  static const detailContentSpacing = 16.0;
+  static const detailOptionsSpacing = 8.0;
+  static const detailBottomPadding = 16.0;
+  static const sizeChipPadding = 10.0;
+  static const colorSwatchExtent = 26.0;
+  static const reviewGap = 8.0;
 }

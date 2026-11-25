@@ -1,5 +1,6 @@
 class StringConst {
   static const appTitle = 'Mobile Ecommerce';
+  static const appFontFamily = 'Sora';
   static const helloWelcome = 'Hello, Welcome 👋';
   static const userName = 'Albert Stevano';
   static const searchClothesHint = 'Search clothes. . .';
@@ -33,4 +34,13 @@ class StringConst {
   static String price(double value) => '\$${value.toStringAsFixed(2)}';
 
   static String reviewLabel(double rating, int count) => '$rating ($count $reviewsSuffix)';
+
+  static String addToCartLabel(double value) => '$addToCart | ${price(value)}';
+
+  static String formattedReviews(int count) {
+    if (count < 1000) return '($count $reviewsSuffix)';
+    final thousands = count ~/ 1000;
+    final rest = (count % 1000).toString().padLeft(3, '0');
+    return '($thousands.$rest $reviewsSuffix)';
+  }
 }

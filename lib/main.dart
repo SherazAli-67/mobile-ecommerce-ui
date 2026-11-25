@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       create: (_) => CartProvider(),
       child: MaterialApp.router(
         title: StringConst.appTitle,
-        theme: ThemeData(brightness: .light),
+        theme: ThemeData(brightness: .light, fontFamily: StringConst.appFontFamily),
         routerConfig: router,
         builder: (ctx, child) => child!,
       ),
