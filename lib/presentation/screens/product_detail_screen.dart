@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_ecommerce_ui/constants/number_constant.dart';
 import 'package:mobile_ecommerce_ui/constants/string_const.dart';
 import 'package:mobile_ecommerce_ui/core/app_colors.dart';
+import 'package:mobile_ecommerce_ui/core/app_motion.dart';
 import 'package:mobile_ecommerce_ui/core/app_textstyles.dart';
 import 'package:mobile_ecommerce_ui/core/asset_res.dart';
 import 'package:mobile_ecommerce_ui/core/models/product_model.dart';
@@ -63,9 +64,17 @@ class ProductDetailScreen extends StatelessWidget {
       child: Stack(
         fit: .expand,
         children: [
-          ClipRRect(
-            borderRadius: .circular(NumberConstant.radiusMd),
-            child: Image.asset(provider.product.image, fit: .cover, width: double.infinity, height: double.infinity,),
+          Hero(
+            tag: AppMotion.productImageHeroTag(provider.product.id),
+            child: ClipRRect(
+              borderRadius: .circular(NumberConstant.radiusMd),
+              child: Image.asset(
+                provider.product.image,
+                fit: .cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
           ),
           Positioned(
             top: NumberConstant.detailImageActionInset,

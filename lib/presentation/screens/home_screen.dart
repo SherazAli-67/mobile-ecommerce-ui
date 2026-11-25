@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_ecommerce_ui/constants/number_constant.dart';
 import 'package:mobile_ecommerce_ui/constants/string_const.dart';
 import 'package:mobile_ecommerce_ui/core/app_colors.dart';
-import 'package:mobile_ecommerce_ui/core/app_data.dart';
+import 'package:mobile_ecommerce_ui/core/app_motion.dart';
 import 'package:mobile_ecommerce_ui/core/app_textstyles.dart';
 import 'package:mobile_ecommerce_ui/core/asset_res.dart';
 import 'package:mobile_ecommerce_ui/core/models/category_model.dart';
@@ -13,6 +13,8 @@ import 'package:mobile_ecommerce_ui/presentation/providers/cart_provider.dart';
 import 'package:mobile_ecommerce_ui/presentation/providers/home_provider.dart';
 import 'package:mobile_ecommerce_ui/presentation/screens/product_detail_screen.dart';
 import 'package:mobile_ecommerce_ui/presentation/widgets/bottom_nav_bar.dart';
+import 'package:mobile_ecommerce_ui/presentation/widgets/scale_on_tap.dart';
+import 'package:mobile_ecommerce_ui/presentation/widgets/staggered_fade_slide.dart';
 import 'package:mobile_ecommerce_ui/routing/router.dart';
 import 'package:provider/provider.dart';
 
@@ -46,7 +48,13 @@ class HomeScreen extends StatelessWidget {
                       _buildCategories(homeProvider),
                     ],
                   ),
-                  Expanded(child: _buildProductGrid(context, homeProvider.filteredProducts)),
+                  Expanded(
+                    child: _buildProductGrid(
+                      context,
+                      homeProvider.filteredProducts,
+                      filterKey: '${homeProvider.selectedCategoryId}|${homeProvider.searchQuery}',
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -90,7 +98,7 @@ class HomeScreen extends StatelessWidget {
             spacing: NumberConstant.headerSpacing,
             children: [
               Text(StringConst.helloWelcome, style: AppTextStyles.greeting,),
-              Text(AppData.userName, style: AppTextStyles.userName,),
+              Text(StringConst.userName, style: AppTextStyles.userName,),
             ],
           ),
         ),
@@ -120,7 +128,7 @@ class HomeScreen extends StatelessWidget {
             child: Row(
               spacing: NumberConstant.searchIconGap,
               children: [
-                SvgPicture.asset(AssetRes.icSearch, colorFilter: .mode(AppColors.grey6, .srcIn),),
+                SvgPicture.asset(AssetRes.icSearch),
                 Expanded(
                   child: TextField(
                     onChanged: homeProvider.updateSearch,
@@ -147,7 +155,7 @@ class HomeScreen extends StatelessWidget {
             borderRadius: .circular(NumberConstant.radiusSm),
           ),
           padding: .all(NumberConstant.filterPadding),
-          child: SvgPicture.asset(AssetRes.icFilter, colorFilter: .mode(AppColors.grey2, .srcIn),),
+          child: SvgPicture.asset(AssetRes.icFilter),
         ),
       ],
     );
@@ -170,29 +178,59 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryChip({required CategoryModel category, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildCategoryChip({
+    required CategoryModel category,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: AppMotion.fast,
+        curve: AppMotion.emphasized,
         decoration: BoxDecoration(
           color: isSelected ? AppColors.grey13 : AppColors.whiteColor,
           borderRadius: .circular(NumberConstant.radiusSm),
           border: isSelected ? null : .all(color: AppColors.grey5),
         ),
-        padding: .symmetric(horizontal: NumberConstant.chipHorizontalPadding, vertical: NumberConstant.chipVerticalPadding),
+        padding: .symmetric(
+          horizontal: NumberConstant.chipHorizontalPadding,
+          vertical: NumberConstant.chipVerticalPadding,
+        ),
         child: Row(
           mainAxisSize: .min,
           spacing: NumberConstant.chipIconGap,
           children: [
-            SvgPicture.asset(category.icon, colorFilter: .mode(isSelected ? AppColors.grey2 : AppColors.grey13, .srcIn),),
-            Text(category.name, style: isSelected ? AppTextStyles.categorySelected : AppTextStyles.categoryUnselected,),
+            AnimatedSwitcher(
+              duration: AppMotion.fast,
+              child: SvgPicture.asset(
+                category.icon,
+                key: ValueKey('$isSelected-${category.id}'),
+                colorFilter: .mode(
+                  isSelected ? AppColors.grey2 : AppColors.grey13,
+                  .srcIn,
+                ),
+              ),
+            ),
+            AnimatedDefaultTextStyle(
+              duration: AppMotion.fast,
+              curve: AppMotion.emphasized,
+              style: isSelected
+                  ? AppTextStyles.categorySelected
+                  : AppTextStyles.categoryUnselected,
+              child: Text(category.name),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProductGrid(BuildContext context, List<ProductModel> products) {
+  Widget _buildProductGrid(
+    BuildContext context,
+    List<ProductModel> products, {
+    required String filterKey,
+  }) {
     final leftProducts = <ProductModel>[];
     final rightProducts = <ProductModel>[];
     for (var i = 0; i < products.length; i++) {
@@ -202,36 +240,57 @@ class HomeScreen extends StatelessWidget {
         rightProducts.add(products[i]);
       }
     }
-    return SingleChildScrollView(
-      padding: .only(bottom: NumberConstant.homeBottomContentPadding),
-      child: Row(
-        crossAxisAlignment: .start,
-        spacing: NumberConstant.productGridGap,
-        children: [
-          Expanded(
-            child: Column(
-              spacing: NumberConstant.sectionSpacing,
-              children: [
-                for (final product in leftProducts) _buildProductCard(context, product),
-              ],
+
+    return AnimatedSwitcher(
+      duration: AppMotion.normal,
+      switchInCurve: AppMotion.standard,
+      switchOutCurve: AppMotion.emphasized,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      child: SingleChildScrollView(
+        key: ValueKey(filterKey),
+        padding: .only(bottom: NumberConstant.homeBottomContentPadding),
+        child: Row(
+          crossAxisAlignment: .start,
+          spacing: NumberConstant.productGridGap,
+          children: [
+            Expanded(
+              child: Column(
+                spacing: NumberConstant.sectionSpacing,
+                children: [
+                  for (var i = 0; i < leftProducts.length; i++)
+                    StaggeredFadeSlide(
+                      index: i * 2,
+                      child: _buildProductCard(context, leftProducts[i]),
+                    ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: Column(
-              spacing: NumberConstant.sectionSpacing,
-              children: [
-                for (final product in rightProducts) _buildProductCard(context, product),
-              ],
+            Expanded(
+              child: Column(
+                spacing: NumberConstant.sectionSpacing,
+                children: [
+                  for (var i = 0; i < rightProducts.length; i++)
+                    StaggeredFadeSlide(
+                      index: i * 2 + 1,
+                      child: _buildProductCard(context, rightProducts[i]),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildProductCard(BuildContext context, ProductModel product) {
     final homeProvider = context.read<HomeProvider>();
-    return GestureDetector(
+    return ScaleOnTap(
       onTap: () => context.push(
         NamedRoutes.productDetail.location(id: product.id),
         extra: ProductDetailRouteArgs(product: product),
@@ -241,13 +300,18 @@ class HomeScreen extends StatelessWidget {
         spacing: NumberConstant.productCardSpacing,
         children: [
           AspectRatio(
-            aspectRatio: product.useTallImage ? NumberConstant.productImageAspectTall : NumberConstant.productImageAspectShort,
+            aspectRatio: product.useTallImage
+                ? NumberConstant.productImageAspectTall
+                : NumberConstant.productImageAspectShort,
             child: Stack(
               fit: .expand,
               children: [
-                ClipRRect(
-                  borderRadius: .circular(NumberConstant.radiusMd),
-                  child: Image.asset(product.image, fit: .cover, width: double.infinity, height: double.infinity,),
+                Hero(
+                  tag: AppMotion.productImageHeroTag(product.id),
+                  child: ClipRRect(
+                    borderRadius: .circular(NumberConstant.radiusMd),
+                    child: Image.asset(product.image, fit: .cover),
+                  ),
                 ),
                 Positioned(
                   top: NumberConstant.favoriteOverlayInset,
@@ -255,11 +319,30 @@ class HomeScreen extends StatelessWidget {
                   child: GestureDetector(
                     onTap: () => homeProvider.toggleFavorite(product.id),
                     child: Container(
-                      decoration: BoxDecoration(color: AppColors.grey13, shape: .circle),
+                      decoration: BoxDecoration(
+                        color: AppColors.grey13,
+                        shape: .circle,
+                      ),
                       padding: .all(NumberConstant.favoriteOverlayPadding),
-                      child: SvgPicture.asset(
-                        product.isFavorite ? AssetRes.icFavoriteFilled : AssetRes.icFavoriteOutlined,
-                        colorFilter: .mode(AppColors.grey2, .srcIn),
+                      child: AnimatedSwitcher(
+                        duration: AppMotion.fast,
+                        switchInCurve: AppMotion.bounce,
+                        transitionBuilder: (child, animation) {
+                          return ScaleTransition(
+                            scale: animation,
+                            child: FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: SvgPicture.asset(
+                          product.isFavorite
+                              ? AssetRes.icFavoriteFilled
+                              : AssetRes.icFavoriteOutlined,
+                          key: ValueKey(product.isFavorite),
+                          colorFilter: .mode(AppColors.grey2, .srcIn),
+                        ),
                       ),
                     ),
                   ),
@@ -275,20 +358,26 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: .start,
                 spacing: NumberConstant.productMetaSpacing,
                 children: [
-                  Text(product.name, style: AppTextStyles.productTitle, maxLines: 1, overflow: .ellipsis,),
-                  Text(product.category, style: AppTextStyles.productCategory, maxLines: 1, overflow: .ellipsis,),
+                  Text(product.name, style: AppTextStyles.productTitle),
+                  Text(product.category, style: AppTextStyles.productCategory),
                 ],
               ),
               Row(
                 children: [
-                  Text(StringConst.price(product.price), style: AppTextStyles.productPrice,),
+                  Text(
+                    StringConst.price(product.price),
+                    style: AppTextStyles.productPrice,
+                  ),
                   const Spacer(),
                   Row(
                     mainAxisSize: .min,
                     spacing: NumberConstant.ratingIconGap,
                     children: [
                       SvgPicture.asset(AssetRes.icStar),
-                      Text(product.rating.toStringAsFixed(1), style: AppTextStyles.rating,),
+                      Text(
+                        product.rating.toStringAsFixed(1),
+                        style: AppTextStyles.rating,
+                      ),
                     ],
                   ),
                 ],
