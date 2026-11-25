@@ -15,6 +15,7 @@ class StringConst {
   static const productLightDressYellow = 'Light Dress Yellow';
   static const productDescription = 'Its simple and elegant shape makes it perfect for those of you who like you who want minimalist clothes';
   static const readMore = 'Read More. . .';
+  static const readLess = 'Read Less';
   static const chooseSize = 'Choose Size';
   static const color = 'Color';
   static const addToCart = 'Add to Cart';

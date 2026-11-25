@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mobile_ecommerce_ui/constants/number_constant.dart';
 import 'package:mobile_ecommerce_ui/core/app_colors.dart';
 import 'package:mobile_ecommerce_ui/core/app_textstyles.dart';
+import 'package:mobile_ecommerce_ui/presentation/widgets/scale_on_tap.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String label;
@@ -20,7 +21,7 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return ScaleOnTap(
       onTap: onTap,
       child: Container(
         width: double.infinity,
@@ -37,13 +38,23 @@ class PrimaryButton extends StatelessWidget {
           mainAxisSize: .min,
           spacing: NumberConstant.primaryButtonIconGap,
           children: [
-            if (leadingIcon != null) SvgPicture.asset(leadingIcon!, colorFilter: .mode(AppColors.grey2, .srcIn),),
+            if (leadingIcon != null)
+              SvgPicture.asset(
+                leadingIcon!,
+                colorFilter: .mode(AppColors.grey2, .srcIn),
+              ),
             Flexible(
               child: Text.rich(
                 TextSpan(
                   children: [
-                    TextSpan(text: label, style: AppTextStyles.primaryButton,),
-                    if (trailingLabel != null) TextSpan(text: ' $trailingLabel', style: AppTextStyles.strikePrice.copyWith(color: AppColors.grey6),),
+                    TextSpan(text: label, style: AppTextStyles.primaryButton),
+                    if (trailingLabel != null)
+                      TextSpan(
+                        text: ' $trailingLabel',
+                        style: AppTextStyles.strikePrice.copyWith(
+                          color: AppColors.grey6,
+                        ),
+                      ),
                   ],
                 ),
                 textAlign: .center,

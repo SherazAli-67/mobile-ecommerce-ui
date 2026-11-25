@@ -13,11 +13,38 @@ import 'package:mobile_ecommerce_ui/presentation/providers/product_detail_provid
 import 'package:mobile_ecommerce_ui/presentation/widgets/circular_icon_button.dart';
 import 'package:mobile_ecommerce_ui/presentation/widgets/primary_button.dart';
 import 'package:mobile_ecommerce_ui/presentation/widgets/quantity_stepper.dart';
+import 'package:mobile_ecommerce_ui/presentation/widgets/staggered_fade_slide.dart';
 import 'package:mobile_ecommerce_ui/routing/router.dart';
 import 'package:provider/provider.dart';
 
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({super.key});
+
+  @override
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  bool _cartPulse = false;
+  bool _addingToCart = false;
+
+  Future<void> _onAddToCart(ProductDetailProvider provider) async {
+    if (_addingToCart) return;
+    _addingToCart = true;
+
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    if (!disableAnimations) {
+      setState(() => _cartPulse = true);
+      await Future<void>.delayed(AppMotion.normal);
+      if (!mounted) return;
+      setState(() => _cartPulse = false);
+    }
+
+    final product = provider.product;
+    context.read<CartProvider>().addProduct(product, quantity: provider.quantity);
+    context.push(NamedRoutes.checkout.routeName);
+    _addingToCart = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +54,12 @@ class ProductDetailScreen extends StatelessWidget {
       backgroundColor: AppColors.whiteColor,
       body: SafeArea(
         child: Padding(
-          padding: .fromLTRB(NumberConstant.horizontalPadding, NumberConstant.homeTopPadding, NumberConstant.horizontalPadding, NumberConstant.detailBottomPadding),
+          padding: .fromLTRB(
+            NumberConstant.horizontalPadding,
+            NumberConstant.homeTopPadding,
+            NumberConstant.horizontalPadding,
+            NumberConstant.detailBottomPadding,
+          ),
           child: Column(
             spacing: NumberConstant.detailSectionSpacing,
             children: [
@@ -37,19 +69,26 @@ class ProductDetailScreen extends StatelessWidget {
                     spacing: NumberConstant.detailSectionSpacing,
                     children: [
                       _buildHero(context, provider),
-                      _buildDetails(provider),
+                      StaggeredFadeSlide(
+                        index: 0,
+                        child: _buildDetails(provider),
+                      ),
                     ],
                   ),
                 ),
               ),
-              PrimaryButton(
-                label: StringConst.addToCartLabel(product.price),
-                leadingIcon: AssetRes.icCart,
-                trailingLabel: product.originalPrice == null ? null : StringConst.price(product.originalPrice!),
-                onTap: () {
-                  context.read<CartProvider>().addProduct(product, quantity: provider.quantity);
-                  context.push(NamedRoutes.checkout.routeName);
-                },
+              AnimatedScale(
+                scale: _cartPulse ? 1.04 : 1,
+                duration: AppMotion.fast,
+                curve: AppMotion.emphasized,
+                child: PrimaryButton(
+                  label: StringConst.addToCartLabel(product.price),
+                  leadingIcon: AssetRes.icCart,
+                  trailingLabel: product.originalPrice == null
+                      ? null
+                      : StringConst.price(product.originalPrice!),
+                  onTap: () => _onAddToCart(provider),
+                ),
               ),
             ],
           ),
@@ -90,9 +129,12 @@ class ProductDetailScreen extends StatelessWidget {
             top: NumberConstant.detailImageActionInset,
             right: NumberConstant.detailImageActionInset,
             child: CircularIconButton(
-              icon: provider.isFavorite ? AssetRes.icFavoriteFilled : AssetRes.icFavoriteOutlined,
+              icon: provider.isFavorite
+                  ? AssetRes.icFavoriteFilled
+                  : AssetRes.icFavoriteOutlined,
               showShadow: true,
               iconColor: AppColors.grey13,
+              animateIcon: true,
               onTap: provider.toggleFavorite,
             ),
           ),
@@ -115,7 +157,7 @@ class ProductDetailScreen extends StatelessWidget {
                 crossAxisAlignment: .start,
                 spacing: NumberConstant.headerSpacing,
                 children: [
-                  Text(product.name, style: AppTextStyles.detailTitle,),
+                  Text(product.name, style: AppTextStyles.detailTitle),
                   Row(
                     spacing: NumberConstant.reviewGap,
                     children: [
@@ -123,9 +165,17 @@ class ProductDetailScreen extends StatelessWidget {
                       Text.rich(
                         TextSpan(
                           children: [
-                            TextSpan(text: product.rating.toStringAsFixed(1), style: AppTextStyles.reviewRating,),
+                            TextSpan(
+                              text: product.rating.toStringAsFixed(1),
+                              style: AppTextStyles.reviewRating,
+                            ),
                             const TextSpan(text: ' '),
-                            TextSpan(text: StringConst.formattedReviews(product.reviewCount), style: AppTextStyles.reviewLink,),
+                            TextSpan(
+                              text: StringConst.formattedReviews(
+                                product.reviewCount,
+                              ),
+                              style: AppTextStyles.reviewLink,
+                            ),
                           ],
                         ),
                       ),
@@ -142,23 +192,8 @@ class ProductDetailScreen extends StatelessWidget {
             ),
           ],
         ),
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: product.description, style: AppTextStyles.description,),
-              if (!provider.isDescriptionExpanded)
-                WidgetSpan(
-                  alignment: .baseline,
-                  baseline: .alphabetic,
-                  child: GestureDetector(
-                    onTap: provider.toggleDescription,
-                    child: Text(' ${StringConst.readMore}', style: AppTextStyles.readMore,),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const Divider(color: AppColors.grey5, height: 1,),
+        _buildDescription(provider, product.description),
+        const Divider(color: AppColors.grey5, height: 1),
         Row(
           crossAxisAlignment: .start,
           children: [
@@ -170,28 +205,74 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildDescription(ProductDetailProvider provider, String description) {
+    final expanded = provider.isDescriptionExpanded;
+    return GestureDetector(
+      onTap: provider.toggleDescription,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedSize(
+        duration: AppMotion.normal,
+        curve: AppMotion.standard,
+        alignment: Alignment.topLeft,
+        child: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: description,
+                style: AppTextStyles.description,
+              ),
+              TextSpan(
+                text: expanded
+                    ? ' ${StringConst.readLess}'
+                    : ' ${StringConst.readMore}',
+                style: AppTextStyles.readMore,
+              ),
+            ],
+          ),
+          maxLines: expanded ? null : 2,
+          overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
   Widget _buildSizeSection(ProductDetailProvider provider) {
     return Column(
       crossAxisAlignment: .start,
       spacing: NumberConstant.detailOptionsSpacing,
       children: [
-        Text(StringConst.chooseSize, style: AppTextStyles.sectionLabel,),
+        Text(StringConst.chooseSize, style: AppTextStyles.sectionLabel),
         Row(
           spacing: NumberConstant.sizeChipGap,
           children: [
             for (final size in provider.sizes)
               GestureDetector(
                 onTap: () => provider.selectSize(size),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: provider.selectedSize == size ? AppColors.grey13 : AppColors.whiteColor,
-                    shape: .circle,
-                    border: provider.selectedSize == size ? null : .all(color: AppColors.grey5),
-                  ),
-                  padding: .all(NumberConstant.sizeChipPadding),
-                  child: Text(
-                    size,
-                    style: provider.selectedSize == size ? AppTextStyles.sizeLabelSelected : AppTextStyles.sizeLabel,
+                child: AnimatedScale(
+                  scale: provider.selectedSize == size ? 1.08 : 1,
+                  duration: AppMotion.fast,
+                  curve: AppMotion.emphasized,
+                  child: AnimatedContainer(
+                    duration: AppMotion.fast,
+                    curve: AppMotion.emphasized,
+                    decoration: BoxDecoration(
+                      color: provider.selectedSize == size
+                          ? AppColors.grey13
+                          : AppColors.whiteColor,
+                      shape: .circle,
+                      border: provider.selectedSize == size
+                          ? null
+                          : .all(color: AppColors.grey5),
+                    ),
+                    padding: .all(NumberConstant.sizeChipPadding),
+                    child: AnimatedDefaultTextStyle(
+                      duration: AppMotion.fast,
+                      curve: AppMotion.emphasized,
+                      style: provider.selectedSize == size
+                          ? AppTextStyles.sizeLabelSelected
+                          : AppTextStyles.sizeLabel,
+                      child: Text(size),
+                    ),
                   ),
                 ),
               ),
@@ -206,20 +287,29 @@ class ProductDetailScreen extends StatelessWidget {
       crossAxisAlignment: .start,
       spacing: NumberConstant.detailOptionsSpacing,
       children: [
-        Text(StringConst.color, style: AppTextStyles.sectionLabel,),
+        Text(StringConst.color, style: AppTextStyles.sectionLabel),
         Row(
           spacing: NumberConstant.colorChipGap,
           children: [
             for (final color in ProductDetailProvider.colors)
               GestureDetector(
                 onTap: () => provider.selectColor(color),
-                child: Container(
-                  width: NumberConstant.colorSwatchExtent,
-                  height: NumberConstant.colorSwatchExtent,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: .circle,
-                    border: provider.selectedColor == color ? .all(color: AppColors.grey2, width: 2) : null,
+                child: AnimatedScale(
+                  scale: provider.selectedColor == color ? 1.12 : 1,
+                  duration: AppMotion.fast,
+                  curve: AppMotion.emphasized,
+                  child: AnimatedContainer(
+                    duration: AppMotion.fast,
+                    curve: AppMotion.emphasized,
+                    width: NumberConstant.colorSwatchExtent,
+                    height: NumberConstant.colorSwatchExtent,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: .circle,
+                      border: provider.selectedColor == color
+                          ? .all(color: AppColors.grey2, width: 2)
+                          : .all(color: Colors.transparent, width: 0),
+                    ),
                   ),
                 ),
               ),
